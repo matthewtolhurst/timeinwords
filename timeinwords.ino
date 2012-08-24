@@ -11,19 +11,26 @@ DMD dmd(DISPLAYS_ACROSS, DISPLAYS_DOWN);
 
 long i = 0;
 int x = 0;
-
+int switchPin = 3;
+boolean buttonPressed = false;
 
 void ScanDMD()
 { 
   dmd.scanDisplayBySPI();
   
   x++;
-  
+
+
+    
   /* The initializer is set to 5000 microseconds. 1,000,000 is 1 second 
      so 200 = 1,000,000 / 5000. Execute every second! */
   if (x == 200) {
      x=0;
 
+    if (buttonPressed == true) {
+      i = i + 60;
+      buttonPressed = false;
+    }
   
     int hours = i / 3600;
     int minutes = (i % 3600) / 60;
@@ -222,10 +229,13 @@ void ScanDMD()
     
     
     i++; 
-    if (i == 86400){
+    if (i >= 86400){
     i = 0;
     }
+
   }
+
+    
 }
 
 void setup() {
@@ -238,6 +248,8 @@ void setup() {
    //clear/init the DMD pixels held in RAM
    dmd.clearScreen( true );   //true is normal (all pixels off), false is negative (all pixels on)
    dmd.selectFont(System5x7);
+   
+   pinMode(switchPin, INPUT);
 }
 
 void formatTimeDigits(char strOut[4], int num)
@@ -256,4 +268,16 @@ int freeRam () {
 
 void loop() {
   // put your main code here, to run repeatedly: 
+
+    if (digitalRead(switchPin) == HIGH)
+    {
+      dmd.drawFilledBox(30,15,30,15,GRAPHICS_NORMAL);
+      //i = i+60;
+      buttonPressed = true;
+    }
+    else
+    {
+      dmd.drawFilledBox(31,15,31,15,GRAPHICS_NOR);
+    }
+
 }
